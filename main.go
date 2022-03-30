@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"net/http"
+	"time"
 
 	"github.com/gautamprikshit1/pong-game-backend/entity"
 	"github.com/gin-contrib/cors"
@@ -16,11 +16,12 @@ var (
 			return true
 		},
 	}
+
 	keysPressed      entity.KeysPressed
-	initBallVelocity float32       = 0.05
+	initBallVelocity float32       = 0.04
 	leftPaddle       entity.Paddle = entity.Paddle{
 		Position: entity.Position{
-			X: 5,
+			X: 1,
 			Y: 50,
 		},
 		Score:  0,
@@ -30,7 +31,7 @@ var (
 	}
 	rightPaddle entity.Paddle = entity.Paddle{
 		Position: entity.Position{
-			X: 95,
+			X: 99,
 			Y: 50,
 		},
 		Score:  0,
@@ -58,32 +59,26 @@ var (
 
 func wsKeys(w http.ResponseWriter, r *http.Request) {
 	ws, err = wsUpgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal("Error upgrading the connection: ", err)
-	}
-	defer ws.Close()
-	for {
-		err = ws.WriteJSON(message)
-		if err != nil {
-			log.Fatal("Error occured writing JSON: ", err)
-		}
-		ball.Update(&leftPaddle, &rightPaddle)
-		message.Update(&leftPaddle, &rightPaddle, &ball)
-		err = ws.ReadJSON(&keysPressed)
-		if err != nil {
-			log.Println("Error reading JSON: ", err)
-			return
-		}
-		if keysPressed.S || keysPressed.W {
+	go func(conn *websocket.Conn) {
+		for {
+			err = conn.ReadJSON(&keysPressed)
+			if err != nil {
+				break
+			}
 			leftPaddle.Update(&keysPressed)
-			message.Update(&leftPaddle, &rightPaddle, &ball)
-			ws.WriteJSON(message)
-		} else if keysPressed.Down || keysPressed.Up {
 			rightPaddle.Update(&keysPressed)
 			message.Update(&leftPaddle, &rightPaddle, &ball)
-			ws.WriteJSON(message)
 		}
-	}
+	}(ws)
+
+	go func(conn *websocket.Conn) {
+		ch := time.Tick(5 * time.Microsecond)
+		for range ch {
+			conn.WriteJSON(message)
+			ball.Update(&leftPaddle, &rightPaddle)
+			message.Update(&leftPaddle, &rightPaddle, &ball)
+		}
+	}(ws)
 }
 
 /*func wsPaddleLeft(w http.ResponseWriter, r *http.Request) {
