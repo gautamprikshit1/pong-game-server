@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -18,14 +19,14 @@ var (
 	}
 
 	keysPressed      entity.KeysPressed
-	initBallVelocity float32       = 0.04
+	initBallVelocity float32       = 0.03
 	leftPaddle       entity.Paddle = entity.Paddle{
 		Position: entity.Position{
 			X: 1,
 			Y: 50,
 		},
 		Score:  0,
-		Speed:  0.1,
+		Speed:  2.5,
 		Width:  1,
 		Height: 12,
 	}
@@ -35,7 +36,7 @@ var (
 			Y: 50,
 		},
 		Score:  0,
-		Speed:  0.1,
+		Speed:  2.5,
 		Width:  1,
 		Height: 12,
 	}
@@ -44,7 +45,7 @@ var (
 			X: 50,
 			Y: 50,
 		},
-		Radius:    2.5,
+		Radius:    1.25,
 		XVelocity: initBallVelocity,
 		YVelocity: initBallVelocity,
 	}
@@ -57,6 +58,13 @@ var (
 	err error
 )
 
+func reset(b *entity.Ball, lPaddle *entity.Paddle, rPaddle *entity.Paddle) {
+	b.X = 50
+	b.Y = 50
+	lPaddle.Y = 50
+	rPaddle.Y = 50
+}
+
 func wsKeys(w http.ResponseWriter, r *http.Request) {
 	ws, err = wsUpgrader.Upgrade(w, r, nil)
 	go func(conn *websocket.Conn) {
@@ -65,9 +73,16 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				break
 			}
-			leftPaddle.Update(&keysPressed)
-			rightPaddle.Update(&keysPressed)
-			message.Update(&leftPaddle, &rightPaddle, &ball)
+			fmt.Println(keysPressed)
+			if keysPressed.S || keysPressed.W {
+				leftPaddle.Update(&keysPressed)
+				ball.Update(&leftPaddle, &rightPaddle)
+				message.Update(&leftPaddle, &rightPaddle, &ball)
+			} else if keysPressed.Down || keysPressed.Up {
+				rightPaddle.Update(&keysPressed)
+				ball.Update(&leftPaddle, &rightPaddle)
+				message.Update(&leftPaddle, &rightPaddle, &ball)
+			}
 		}
 	}(ws)
 
@@ -76,27 +91,18 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 		for range ch {
 			conn.WriteJSON(message)
 			ball.Update(&leftPaddle, &rightPaddle)
+			if ball.X < 0 {
+				rightPaddle.Score++
+				reset(&ball, &leftPaddle, &rightPaddle)
+			} else if ball.X > 100 {
+				leftPaddle.Score++
+				reset(&ball, &leftPaddle, &rightPaddle)
+			}
 			message.Update(&leftPaddle, &rightPaddle, &ball)
+			time.Sleep(1 * time.Millisecond)
 		}
 	}(ws)
 }
-
-/*func wsPaddleLeft(w http.ResponseWriter, r *http.Request) {
-	ws, err := wsUpgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal("Error upgrading the connection: ", err)
-	}
-	defer ws.Close()
-	for {
-		err = ws.WriteJSON(leftPaddle)
-		if err != nil {
-			log.Fatal("Error occured writing JSON: ", err)
-		}
-		leftPaddle.Update(&keysPressed)
-		fmt.Println("Left Paddle: ", leftPaddle)
-	}
-}
-*/
 
 func main() {
 	router := gin.Default()
