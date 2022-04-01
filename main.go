@@ -111,6 +111,7 @@ func main() {
 	router.GET("/ws", func(ctx *gin.Context) {
 		wsKeys(ctx.Writer, ctx.Request)
 	})
+	gin.SetMode(gin.ReleaseMode)
 
 	router.Run(os.Getenv("PORT"))
 }
