@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -74,9 +73,12 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 			err = conn.ReadJSON(&keysPressed)
 			if err != nil {
 				isOpen = false
+				reset(&ball, &leftPaddle, &rightPaddle)
+				leftPaddle.Score = 0
+				rightPaddle.Score = 0
+				message.Update(&leftPaddle, &rightPaddle, &ball)
 				break
 			}
-			fmt.Println(keysPressed)
 			if keysPressed.S || keysPressed.W {
 				leftPaddle.Update(&keysPressed)
 				ball.Update(&leftPaddle, &rightPaddle)
