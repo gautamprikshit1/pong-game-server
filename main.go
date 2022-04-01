@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gautamprikshit1/pong-game-backend/entity"
@@ -111,5 +112,5 @@ func main() {
 		wsKeys(ctx.Writer, ctx.Request)
 	})
 
-	router.Run(":5000")
+	router.Run(os.Getenv("PORT"))
 }
