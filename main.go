@@ -68,6 +68,7 @@ func reset(b *entity.Ball, lPaddle *entity.Paddle, rPaddle *entity.Paddle) {
 
 func wsKeys(w http.ResponseWriter, r *http.Request) {
 	ws, err = wsUpgrader.Upgrade(w, r, nil)
+	defer ws.Close()
 	go func(conn *websocket.Conn) {
 		for {
 			err = conn.ReadJSON(&keysPressed)
@@ -85,7 +86,6 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 				message.Update(&leftPaddle, &rightPaddle, &ball)
 			}
 		}
-		defer conn.Close()
 	}(ws)
 
 	go func(conn *websocket.Conn) {
@@ -103,7 +103,6 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 			message.Update(&leftPaddle, &rightPaddle, &ball)
 			time.Sleep(1 * time.Millisecond)
 		}
-		defer conn.Close()
 	}(ws)
 }
 
