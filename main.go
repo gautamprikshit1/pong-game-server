@@ -108,10 +108,10 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
+	gin.SetMode(gin.ReleaseMode)
 	router.GET("/ws", func(ctx *gin.Context) {
 		wsKeys(ctx.Writer, ctx.Request)
 	})
-	gin.SetMode(gin.ReleaseMode)
 
-	router.Run(os.Getenv("PORT"))
+	router.Run(":" + os.Getenv("PORT"))
 }
