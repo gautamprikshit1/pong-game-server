@@ -85,7 +85,7 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 				message.Update(&leftPaddle, &rightPaddle, &ball)
 			}
 		}
-		defer ws.Close()
+		defer conn.Close()
 	}(ws)
 
 	go func(conn *websocket.Conn) {
@@ -103,7 +103,7 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 			message.Update(&leftPaddle, &rightPaddle, &ball)
 			time.Sleep(1 * time.Millisecond)
 		}
-		defer ws.Close()
+		defer conn.Close()
 	}(ws)
 }
 
