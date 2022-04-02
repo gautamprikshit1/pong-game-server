@@ -103,7 +103,7 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 				reset(&ball, &leftPaddle, &rightPaddle)
 			}
 			message.Update(&leftPaddle, &rightPaddle, &ball)
-			time.Sleep(time.Microsecond)
+			time.Sleep(time.Millisecond)
 		}
 	}(ws)
 }
