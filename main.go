@@ -114,7 +114,7 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://go-pong-client.herokuapp.com/"}
 
-	router.Use(cors.Default())
+	router.Use(cors.New(config))
 	gin.SetMode(gin.ReleaseMode)
 	router.GET("/ws", func(ctx *gin.Context) {
 		wsKeys(ctx.Writer, ctx.Request)
