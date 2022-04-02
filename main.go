@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gautamprikshit1/pong-game-backend/entity"
 	"github.com/gin-contrib/cors"
@@ -102,6 +103,7 @@ func wsKeys(w http.ResponseWriter, r *http.Request) {
 				reset(&ball, &leftPaddle, &rightPaddle)
 			}
 			message.Update(&leftPaddle, &rightPaddle, &ball)
+			time.Sleep(time.Microsecond)
 		}
 	}(ws)
 }
