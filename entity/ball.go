@@ -37,14 +37,14 @@ func (b *Ball) Update(leftPaddle *Paddle, rightPaddle *Paddle) {
 		b.Y > leftPaddle.Y-float32(leftPaddle.Height/2) &&
 		b.Y < leftPaddle.Y+float32(leftPaddle.Height/2) {
 		if b.XVelocity < 0 {
-			b.XVelocity -= 0.001
+			b.XVelocity -= 0.0005
 		} else {
-			b.XVelocity += 0.001
+			b.XVelocity += 0.0005
 		}
 		if b.YVelocity < 0 {
-			b.YVelocity -= 0.001
+			b.YVelocity -= 0.0005
 		} else {
-			b.YVelocity += 0.001
+			b.YVelocity += 0.0005
 		}
 		b.XVelocity = -b.XVelocity
 		b.X = leftPaddle.X + float32(leftPaddle.Width/2) + b.Radius

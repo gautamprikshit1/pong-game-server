@@ -61,6 +61,8 @@ var (
 func reset(b *entity.Ball, lPaddle *entity.Paddle, rPaddle *entity.Paddle) {
 	b.X = 50
 	b.Y = 50
+	b.XVelocity = initBallVelocity
+	b.YVelocity = initBallVelocity
 	lPaddle.Y = 50
 	rPaddle.Y = 50
 }
